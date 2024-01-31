@@ -1,0 +1,20 @@
+{
+  "name": "iuc-incubator-admin",
+  "short_name": "iuc-i-a",
+  "theme_color": "#8cdc4f",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "display": "fullscreen",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    { "src": "/public/icons/download-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/public/icons/download-256.png", "type": "image/png", "sizes": "256x256" },
+    {
+        "src": "/public/icons/download-384.png",
+        "sizes": "384x384",
+        "type": "image/png"
+    },
+    { "src": "/public/icons/download-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

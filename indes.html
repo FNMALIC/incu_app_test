@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+    <link rel="manifest" href="manifest.json">
+    <title>Incubator Information</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1em;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px;
+            text-align: center;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px;
+            margin: 0 5px;
+        }
+
+        section {
+            max-width: 100%;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .sensor-values {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .sensor-values div {
+            flex: 0 0 45%;
+            text-align: center;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .graph-container {
+            margin-top: 20px;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 600px) {
+            .sensor-values div {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+    <header>
+        <h1>Mobile App</h1>
+    </header>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+    </nav>
+    <section>
+        <h2>Sensor Values</h2>
+        <div class="sensor-values">
+            <div>
+                <h3>Temperature</h3>
+                <p id="temperature">-- °C</p>
+            </div>
+            <div>
+                <h3>Humidity</h3>
+                <p id="humidity">-- %</p>
+            </div>
+        </div>
+        <div class="graph-container">
+            <h2>Graphs</h2>
+            <!-- Temperature Chart -->
+            <canvas id="temperatureChart" width="400" height="200"></canvas>
+            <!-- Humidity Chart -->
+            <canvas id="humidityChart" width="400" height="200"></canvas>
+        </div>
+    </section>
+
+    <!-- Include your scripts for updating sensor values and displaying graphs -->
+    <script>
+        // Update sensor values
+        async function updateSensorValues() {
+            await fetch('http://172.16.5.99:5000/get_sensor_values')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('temperature').innerText = `${data.TempCorp} °C`;
+                    document.getElementById('humidity').innerText = `${data.humidity} %`;
+                });
+        }
+
+        // Initialize temperature chart
+        const temperatureChartCtx = document.getElementById('temperatureChart').getContext('2d');
+        const temperatureChart = new Chart(temperatureChartCtx, {
+            type: 'line',
+            data: {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    borderColor: 'rgb(255, 99, 132)',
+                    data: [], // Empty data to be updated dynamically
+                }]
+            },
+        });
+
+        // Initialize humidity chart
+        const humidityChartCtx = document.getElementById('humidityChart').getContext('2d');
+        const humidityChart = new Chart(humidityChartCtx, {
+            type: 'line',
+            data: {
+                labels: ['1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Humidity (%)',
+                    borderColor: 'rgb(54, 162, 235)',
+                    data: [], // Empty data to be updated dynamically
+                }]
+            },
+        });
+
+        // Function to update charts with new data
+        function updateCharts() {
+            updateSensorValues(); // Update sensor values before updating charts
+
+            // Simulate updating data every few seconds
+            setInterval(() => {
+                fetch('http://172.16.5.99:5000/get_sensor_values')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update temperature chart data
+                        temperatureChart.data.datasets[0].data.push(data.TempCorp);
+                        // Keep only the last 5 data points
+                        if (temperatureChart.data.datasets[0].data.length > 5) {
+                            temperatureChart.data.datasets[0].data.shift();
+                        }
+                        temperatureChart.update();
+
+                        // Update humidity chart data
+                        humidityChart.data.datasets[0].data.push(data.humidity);
+                        // Keep only the last 5 data points
+                        if (humidityChart.data.datasets[0].data.length > 5) {
+                            humidityChart.data.datasets[0].data.shift();
+                        }
+                        humidityChart.update();
+                    });
+            }, 5000); // Update every 5 seconds
+        }
+
+        // Call the function to update charts
+        updateCharts();
+    </script>
+
+</body>
+
+</html>
