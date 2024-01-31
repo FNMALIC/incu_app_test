@@ -8,5 +8,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "@vercel/edge": "^0.1.2"
+  }
 }
